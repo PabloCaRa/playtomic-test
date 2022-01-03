@@ -1,0 +1,22 @@
+spring.profiles.active: develop
+server:
+  port: 8090
+---
+spring:
+  profiles: develop
+  data.mongodb:
+    uri: mongodb://localhost:27017/playtomic
+stripe.simulator.charges-uri: https://sandbox.playtomic.io/v1/stripe-simulator/charges
+stripe.simulator.refunds-uri: https://sandbox.playtomic.io/v1/stripe-simulator/payments/{payment_id}/refunds
+---
+spring:
+  profiles: test
+  data.mongodb:
+    host: localhost
+    port: 0
+    database: playtomic
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE;IGNORECASE=TRUE
+    initialize: false
+stripe.simulator.charges-uri: http://localhost:9999
+stripe.simulator.refunds-uri: http://localhost:9999
