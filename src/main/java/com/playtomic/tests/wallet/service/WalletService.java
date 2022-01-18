@@ -2,6 +2,7 @@ package com.playtomic.tests.wallet.service;
 
 import java.util.NoSuchElementException;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,8 @@ public class WalletService {
 		return walletRepository.findById(id).orElseThrow();
 	}
 
-	public Wallet topupWallet(WalletTopup walletTopup) throws NoSuchElementException, StripeServiceException {
+	public Wallet topupWallet(WalletTopup walletTopup)
+			throws NoSuchElementException, StripeServiceException, OptimisticLockingFailureException {
 		Wallet wallet = getWalletById(walletTopup.getWalletId());
 
 		stripeService.charge(walletTopup.getCreditCardNumber(), walletTopup.getAmount());

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -105,6 +106,17 @@ public class WalletControllerTest {
 				.amount(BigDecimal.ONE).build();
 
 		given(walletService.topupWallet(walletTopup)).willThrow(StripeAmountTooSmallException.class);
+
+		mockMvc.perform(post("/wallet/topup").contentType(MediaType.APPLICATION_JSON)
+				.content(MAPPER.writeValueAsBytes(walletTopup))).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void givenValidWalletId_whenConcurrentTopup_thenReturnOptimisticLockingFailureException() throws Exception {
+		WalletTopup walletTopup = WalletTopup.builder().walletId(walletId).creditCardNumber(CREDIT_CARD_NUMBER)
+				.amount(BigDecimal.ONE).build();
+
+		given(walletService.topupWallet(walletTopup)).willThrow(OptimisticLockingFailureException.class);
 
 		mockMvc.perform(post("/wallet/topup").contentType(MediaType.APPLICATION_JSON)
 				.content(MAPPER.writeValueAsBytes(walletTopup))).andExpect(status().isConflict());

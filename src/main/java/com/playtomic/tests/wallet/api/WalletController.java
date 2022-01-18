@@ -2,6 +2,7 @@ package com.playtomic.tests.wallet.api;
 
 import java.util.NoSuchElementException;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,9 +52,11 @@ public class WalletController {
 		} catch (NoSuchElementException ex) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet to top-up not found", ex);
 		} catch (StripeAmountTooSmallException ex) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT, "Amount is too small", ex);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is too small", ex);
 		} catch (StripeServiceException ex) {
 			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Error with external provider", ex);
+		} catch (OptimisticLockingFailureException ex) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Wallet has been modified outside this transaction");
 		}
 
 		return wallet;
